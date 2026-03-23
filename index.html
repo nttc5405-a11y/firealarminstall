@@ -191,7 +191,7 @@
     </div>
 
 <script>
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbx6OzGRDxEWv7qgmVti57JISW4TeUnHbmZqJzNWwXeF4wxeUH-N1aY03YvAI7LcfpU7/exec";
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbzeaD2Xm_eaVmzSlVoQss_ufffpwEY0HSm_lI6VzckcmfC0v03Kzvw5-7bIWCrQAgTm/exec";
     let cachedData = [];
 
     // 1. 初始化
@@ -226,12 +226,19 @@
         return true;
     }
 
-    // 5. 上傳功能
+   // 5. 上傳功能 (拆分資格欄位版)
     async function submitToGas() {
         const btn = document.getElementById('submitBtn');
-        const checkboxes = document.querySelectorAll('#eligibility-group input:checked');
-        const eligibility = Array.from(checkboxes).map(cb => cb.value).join(', ');
+        
+        // --- A. 分別抓取兩個群組的勾選內容 ---
+        const personChecks = document.querySelectorAll('#group-person input:checked');
+        const buildingChecks = document.querySelectorAll('#group-building input:checked');
+        
+        // 轉成逗號分隔的字串
+        const p_eligibility = Array.from(personChecks).map(cb => cb.value).join(', ');
+        const b_eligibility = Array.from(buildingChecks).map(cb => cb.value).join(', ');
 
+        // --- B. 組合傳送資料 (Payload) ---
         const payload = {
             year: document.getElementById('year').value,
             date: document.getElementById('install_date').value,
@@ -243,15 +250,20 @@
             quantity: document.getElementById('qty').value,
             approval_no: document.getElementById('approval_no').value.trim(),
             note: document.getElementById('note').value,
-            eligibility: eligibility,
+            
+            // 這裡對應 GAS 的 d.p_eligibility 與 d.b_eligibility
+            p_eligibility: p_eligibility, 
+            b_eligibility: b_eligibility,
+            
             staff: document.getElementById('staff').value.trim(),
             installer: document.getElementById('installer').value.trim(),
             unit: document.getElementById('unit').value
         };
 
+        // 格式驗證
         if(!validateData(payload)) return;
 
-        // 記憶人員
+        // 記憶人員資訊
         localStorage.setItem('fire_staff', payload.staff);
         localStorage.setItem('fire_unit', payload.unit);
 
@@ -259,21 +271,31 @@
         btn.innerText = "上傳中...";
 
         try {
+            // 傳送到 GAS
             await fetch(GAS_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
             
-            // 顯示憑證
+            // --- C. 顯示憑證資訊 ---
             document.getElementById('receipt-content').innerHTML = `
                 <b>年度：</b>${payload.year}<br>
                 <b>受補助人：</b>${payload.name}<br>
                 <b>設置地址：</b>${payload.address}<br>
-                <b>裝設位置：</b>${payload.location} (${payload.quantity}顆)<br>
+                <b>人員資格：</b>${p_eligibility || '無'}<br>
+                <b>建物型態：</b>${b_eligibility || '無'}<br>
                 <b>登打人員：</b>${payload.staff}
             `;
+            
             switchPage('success-page');
+            
+            // 清空姓名與身分證，保留地址與人員方便下一筆登打
             document.getElementById('name').value = "";
             document.getElementById('id_no').value = "";
-        } catch(e) { alert("連線錯誤，請重試"); }
-        finally { btn.disabled = false; btn.innerText = "確認上傳雲端"; }
+            
+        } catch(e) { 
+            alert("連線錯誤，請確認網路或 GAS URL 是否正確"); 
+        } finally { 
+            btn.disabled = false; 
+            btn.innerText = "確認上傳雲端"; 
+        }
     }
 
     // 6. 查重邏輯 (修正：空白時不顯示)
