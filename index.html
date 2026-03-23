@@ -73,17 +73,39 @@
             <div class="form-group"><label>設置地址</label><input type="text" id="address" value="臺東縣成功鎮"></div>
 
             <div class="section-title">設備資訊</div>
-            <div class="grid">
-                <div class="form-group"><label>裝置位置</label>
-                    <select id="location">
-                        <option value="客廳">客廳</option>
-                        <option value="走廊">走廊</option>
-                        <option value="寢室">寢室</option>
-                        <option value="廚房">廚房</option>
-                    </select>
-                </div>
-                <div class="form-group"><label>數量</label><input type="number" id="qty" value="1"></div>
-            </div>
+            <style>
+    /* 位置標籤樣式 (與資格標籤一致) */
+    .chip-location input:checked + span { background: #e8eaf6; border-color: #3f51b5; color: #3f51b5; font-weight: bold; }
+
+    /* 裝設單位按鈕組 */
+    .unit-group { margin-top: 15px; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; }
+    .brigade-btn { 
+        width: 100%; padding: 10px; background: #eeeeee; border: none; 
+        border-bottom: 1px solid #ddd; text-align: left; font-weight: bold; cursor: pointer;
+    }
+    .station-container { display: none; padding: 10px; grid-template-columns: 1fr 1fr 1fr; gap: 8px; background: white; }
+    .station-container.active { display: grid; }
+    .station-btn { 
+        padding: 8px 4px; border: 1px solid #ccc; border-radius: 6px; 
+        font-size: 0.8em; text-align: center; cursor: pointer; background: #fff;
+    }
+    .station-btn.selected { background: #d32f2f; color: white; border-color: #d32f2f; font-weight: bold; }
+</style>
+
+<div class="form-group">
+    <label>裝置位置 (可多選，自動加總數量)</label>
+    <div class="chip-group" id="group-location">
+        <label class="chip chip-location"><input type="checkbox" value="客廳" onchange="calcQty()"><span>客廳</span></label>
+        <label class="chip chip-location"><input type="checkbox" value="臥室" onchange="calcQty()"><span>臥室</span></label>
+        <label class="chip chip-location"><input type="checkbox" value="廚房" onchange="calcQty()"><span>廚房</span></label>
+        <label class="chip chip-location"><input type="checkbox" value="走廊" onchange="calcQty()"><span>走廊</span></label>
+        <label class="chip chip-location"><input type="checkbox" value="樓梯" onchange="calcQty()"><span>樓梯</span></label>
+    </div>
+    <div class="form-group" style="margin-top:10px;">
+        <label>總數量 (可手動修改)</label>
+        <input type="number" id="qty" value="0">
+    </div>
+</div>
             <div class="form-group"><label>認可號碼</label><input type="text" id="approval_no" placeholder="RD-A68121109"></div>
            <style>
     /* 標籤按鈕化樣式 */
@@ -147,13 +169,48 @@
                     <button type="button" class="btn-same" onclick="copyStaff()">同登打人</button>
                 </div>
             </div>
-            <div class="form-group"><label>裝設單位</label>
-                <select id="unit">
-                    <option value="成功分隊">成功分隊</option>
-                    <option value="東河分隊">東河分隊</option>
-                    <option value="長濱分隊">長濱分隊</option>
-                </select>
-            </div>
+            <div class="form-group">
+    <label>裝設單位</label>
+    <div class="unit-group">
+        <button type="button" class="brigade-btn" onclick="toggleStation('b1')">▼ 台東大隊</button>
+        <div id="b1" class="station-container">
+            <div class="station-btn" onclick="selectUnit('台東', this)">台東</div>
+            <div class="station-btn" onclick="selectUnit('大豐', this)">大豐</div>
+            <div class="station-btn" onclick="selectUnit('特搜', this)">特搜</div>
+            <div class="station-btn" onclick="selectUnit('卑南', this)">卑南</div>
+            <div class="station-btn" onclick="selectUnit('南王', this)">南王</div>
+            <div class="station-btn" onclick="selectUnit('知本', this)">知本</div>
+            <div class="station-btn" onclick="selectUnit('豐田', this)">豐田</div>
+            <div class="station-btn" onclick="selectUnit('綠島', this)">綠島</div>
+            <div class="station-btn" onclick="selectUnit('蘭嶼', this)">蘭嶼</div>
+        </div>
+        <button type="button" class="brigade-btn" onclick="toggleStation('b2')">▼ 關山大隊</button>
+        <div id="b2" class="station-container">
+            <div class="station-btn" onclick="selectUnit('關山', this)">關山</div>
+            <div class="station-btn" onclick="selectUnit('池上', this)">池上</div>
+            <div class="station-btn" onclick="selectUnit('鹿野', this)">鹿野</div>
+            <div class="station-btn" onclick="selectUnit('延平', this)">延平</div>
+            <div class="station-btn" onclick="selectUnit('海端', this)">海端</div>
+            <div class="station-btn" onclick="selectUnit('利稻', this)">利稻</div>
+        </div>
+        <button type="button" class="brigade-btn" onclick="toggleStation('b3')">▼ 成功大隊</button>
+        <div id="b3" class="station-container">
+            <div class="station-btn" onclick="selectUnit('都蘭', this)">都蘭</div>
+            <div class="station-btn" onclick="selectUnit('東河', this)">東河</div>
+            <div class="station-btn" onclick="selectUnit('泰源', this)">泰源</div>
+            <div class="station-btn" onclick="selectUnit('成功', this)">成功</div>
+            <div class="station-btn" onclick="selectUnit('長濱', this)">長濱</div>
+        </div>
+        <button type="button" class="brigade-btn" onclick="toggleStation('b4')">▼ 大武大隊</button>
+        <div id="b4" class="station-container">
+            <div class="station-btn" onclick="selectUnit('太麻里', this)">太麻里</div>
+            <div class="station-btn" onclick="selectUnit('金峰', this)">金峰</div>
+            <div class="station-btn" onclick="selectUnit('大溪', this)">大溪</div>
+            <div class="station-btn" onclick="selectUnit('大武', this)">大武</div>
+            <div class="station-btn" onclick="selectUnit('達仁', this)">達仁</div>
+        </div>
+    </div>
+    <input type="hidden" id="selected_unit"> </div>
             <button class="btn-submit" id="submitBtn" onclick="submitToGas()">確認上傳雲端</button>
         </div>
     </div>
@@ -192,53 +249,112 @@
 
 <script>
     const GAS_URL = "https://script.google.com/macros/s/AKfycbyz2tFiHevVoFLD4au-aQCtBvwVUDijzFoLbJc3YP69GUUiIUVnQw6QHaRbAYOciBh0/exec";
-    let cachedData = [];
+    let cachedData = []; // 存放雲端同步回來的資料
 
-    // 1. 初始化
+    // 1. 頁面初始化
     window.onload = () => {
+        // 設定今日日期
         document.getElementById('install_date').valueAsDate = new Date();
-        if(localStorage.getItem('fire_staff')) document.getElementById('staff').value = localStorage.getItem('fire_staff');
-        if(localStorage.getItem('fire_unit')) document.getElementById('unit').value = localStorage.getItem('fire_unit');
+        
+        // 讀取記憶的人員資訊
+        const savedStaff = localStorage.getItem('fire_staff');
+        const savedUnit = localStorage.getItem('fire_unit');
+        
+        if (savedStaff) document.getElementById('staff').value = savedStaff;
+        if (savedUnit) {
+            document.getElementById('selected_unit').value = savedUnit;
+            // 嘗試自動高亮顯示上次選的分隊按鈕
+            highlightSavedUnit(savedUnit);
+        }
     };
 
-    // 2. 切換分頁
+    // 2. 切換分頁邏輯
     function switchPage(pageId) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById(pageId).classList.add('active');
+        
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        if(pageId === 'register-page') document.getElementById('nav-reg').classList.add('active');
-        if(pageId === 'check-page') document.getElementById('nav-check').classList.add('active');
+        if (pageId === 'register-page') document.getElementById('nav-reg').classList.add('active');
+        if (pageId === 'check-page') document.getElementById('nav-check').classList.add('active');
+        
         window.scrollTo(0, 0);
     }
 
-    // 3. 同上按鈕
+    // 3. 裝設位置多選與數量連動
+    function calcQty() {
+        const locChecks = document.querySelectorAll('#group-location input:checked');
+        // 自動根據勾選位置數量設定總顆數
+        document.getElementById('qty').value = locChecks.length;
+    }
+
+    // 4. 裝設單位：大隊摺疊與分隊選取
+    function toggleStation(id) {
+        const target = document.getElementById(id);
+        const isOpen = target.classList.contains('active');
+        // 先收起所有大隊
+        document.querySelectorAll('.station-container').forEach(el => el.classList.remove('active'));
+        // 若點擊的是收起的，則展開
+        if (!isOpen) target.classList.add('active');
+    }
+
+    function selectUnit(name, element) {
+        // 移除所有按鈕的選取顏色
+        document.querySelectorAll('.station-btn').forEach(el => el.classList.remove('selected'));
+        // 將點擊的按鈕變色
+        element.classList.add('selected');
+        // 將數值存入隱藏欄位
+        document.getElementById('selected_unit').value = name;
+    }
+
+    // 輔助：初始化時標註上次選取的單位
+    function highlightSavedUnit(unitName) {
+        const btns = document.querySelectorAll('.station-btn');
+        btns.forEach(btn => {
+            if (btn.innerText === unitName) {
+                btn.classList.add('selected');
+                // 順便展開該大隊
+                btn.parentElement.classList.add('active');
+            }
+        });
+    }
+
+    // 5. 實用工具：同登打人按鈕
     function copyStaff() {
         const staff = document.getElementById('staff').value;
-        if(staff) document.getElementById('installer').value = staff;
+        if (staff) document.getElementById('installer').value = staff;
         else alert("請先輸入登打人姓名");
     }
 
-    // 4. 格式檢查
+    // 6. 格式驗證
     function validateData(d) {
         const idRegex = /^[A-Z][12]\d{8}$/;
-        if(!d.name || !d.address || !d.staff) { alert("姓名、地址與登打人不可為空！"); return false; }
-        if(d.id && !idRegex.test(d.id)) { alert("身分證格式錯誤！(首字大寫)"); return false; }
+        if (!d.name || !d.address || !d.staff || !d.unit) { 
+            alert("請確認『姓名、地址、登打人、裝設單位』是否皆已填寫！"); 
+            return false; 
+        }
+        if (d.id && !idRegex.test(d.id)) { 
+            alert("身分證格式錯誤！(首字需大寫，如：V123456789)"); 
+            return false; 
+        }
         return true;
     }
 
-   // 5. 上傳功能 (拆分資格欄位版)
+    // 7. 主功能：上傳雲端
     async function submitToGas() {
         const btn = document.getElementById('submitBtn');
-        
-        // --- A. 分別抓取兩個群組的勾選內容 ---
-        const personChecks = document.querySelectorAll('#group-person input:checked');
-        const buildingChecks = document.querySelectorAll('#group-building input:checked');
-        
-        // 轉成逗號分隔的字串
-        const p_eligibility = Array.from(personChecks).map(cb => cb.value).join(', ');
-        const b_eligibility = Array.from(buildingChecks).map(cb => cb.value).join(', ');
 
-        // --- B. 組合傳送資料 (Payload) ---
+        // 收集複選框：人員資格
+        const pChecks = document.querySelectorAll('#group-person input:checked');
+        const p_eligibility = Array.from(pChecks).map(cb => cb.value).join(', ');
+
+        // 收集複選框：建物型態
+        const bChecks = document.querySelectorAll('#group-building input:checked');
+        const b_eligibility = Array.from(bChecks).map(cb => cb.value).join(', ');
+
+        // 收集複選框：裝設位置 (新功能)
+        const locChecks = document.querySelectorAll('#group-location input:checked');
+        const locationStr = Array.from(locChecks).map(cb => cb.value).join(', ');
+
         const payload = {
             year: document.getElementById('year').value,
             date: document.getElementById('install_date').value,
@@ -246,73 +362,75 @@
             id: document.getElementById('id_no').value.trim().toUpperCase(),
             phone: document.getElementById('phone').value.trim(),
             address: document.getElementById('address').value.trim(),
-            location: document.getElementById('location').value,
+            
+            location: locationStr, // 位置多選字串
             quantity: document.getElementById('qty').value,
+            
             approval_no: document.getElementById('approval_no').value.trim(),
             note: document.getElementById('note').value,
-            
-            // 這裡對應 GAS 的 d.p_eligibility 與 d.b_eligibility
             p_eligibility: p_eligibility, 
             b_eligibility: b_eligibility,
-            
             staff: document.getElementById('staff').value.trim(),
             installer: document.getElementById('installer').value.trim(),
-            unit: document.getElementById('unit').value
+            unit: document.getElementById('selected_unit').value // 從隱藏欄位取值
         };
 
-        // 格式驗證
-        if(!validateData(payload)) return;
+        if (!validateData(payload)) return;
 
-        // 記憶人員資訊
+        // 記憶人員與單位資訊
         localStorage.setItem('fire_staff', payload.staff);
         localStorage.setItem('fire_unit', payload.unit);
 
         btn.disabled = true;
-        btn.innerText = "上傳中...";
+        btn.innerText = "正在傳送...";
 
         try {
-            // 傳送到 GAS
             await fetch(GAS_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
             
-            // --- C. 顯示憑證資訊 ---
+            // 顯示成功憑證資訊
             document.getElementById('receipt-content').innerHTML = `
                 <b>年度：</b>${payload.year}<br>
                 <b>受補助人：</b>${payload.name}<br>
                 <b>設置地址：</b>${payload.address}<br>
-                <b>人員資格：</b>${p_eligibility || '無'}<br>
-                <b>建物型態：</b>${b_eligibility || '無'}<br>
-                <b>登打人員：</b>${payload.staff}
+                <b>裝設單位：</b>${payload.unit}<br>
+                <b>人員/建物：</b>${p_eligibility || '無'} / ${b_eligibility || '無'}<br>
+                <b>位置數量：</b>${locationStr} (${payload.quantity}顆)
             `;
             
             switchPage('success-page');
             
-            // 清空姓名與身分證，保留地址與人員方便下一筆登打
+            // 清空受補助人姓名與身分證
             document.getElementById('name').value = "";
             document.getElementById('id_no').value = "";
             
         } catch(e) { 
-            alert("連線錯誤，請確認網路或 GAS URL 是否正確"); 
+            alert("上傳失敗，請確認網路連線或 GAS 權限"); 
         } finally { 
             btn.disabled = false; 
             btn.innerText = "確認上傳雲端"; 
         }
     }
 
-    // 6. 查重邏輯 (修正：空白時不顯示)
+    // 8. 查重功能：同步資料
     async function loadAllData() {
+        const syncStatus = document.getElementById('sync-status');
+        syncStatus.innerText = "🔄 正在同步雲端資料...";
         try {
             const res = await fetch(GAS_URL);
             cachedData = await res.json();
-            document.getElementById('sync-status').innerText = `✅ 雲端同步完成 (共 ${cachedData.length} 筆)`;
-        } catch(e) { document.getElementById('sync-status').innerText = "❌ 無法連接雲端"; }
+            syncStatus.innerText = `✅ 雲端同步完成 (共 ${cachedData.length} 筆)`;
+        } catch(e) { 
+            syncStatus.innerText = "❌ 同步失敗，請檢查網路"; 
+        }
     }
 
+    // 9. 查重功能：搜尋過濾 (修正空白顯示問題)
     function searchData() {
         const key = document.getElementById('search-input').value.trim().toUpperCase();
         const resultsDiv = document.getElementById('search-results');
         
-        if(!key) {
-            resultsDiv.innerHTML = '<div class="no-data">請輸入關鍵字開始查詢</div>';
+        if (!key) {
+            resultsDiv.innerHTML = '<div class="no-data">請輸入姓名、地址或身分證字號查詢</div>';
             return;
         }
 
@@ -322,20 +440,24 @@
             (d.id && d.id.includes(key))
         );
 
-        if(filtered.length === 0) {
-            resultsDiv.innerHTML = '<div class="no-data">查無重複資料</div>';
+        if (filtered.length === 0) {
+            resultsDiv.innerHTML = '<div class="no-data">查無重複裝設紀錄</div>';
         } else {
             resultsDiv.innerHTML = filtered.map(r => `
                 <div class="result-item">
                     <div style="font-weight:bold; color:var(--primary);">${r.name}</div>
-                    <div style="font-size:0.9em;">年度：${r.year} | 裝設日：${r.date || '未註記'}</div>
-                    <div style="font-size:0.9em; color:#666;">地址：${r.address}</div>
+                    <div style="font-size:0.85em;">年度：${r.year} | 裝設日：${r.date || '未註記'}</div>
+                    <div style="font-size:0.85em;">資格：${r.p_elig || '無'} / ${r.b_elig || '無'}</div>
+                    <div style="font-size:0.85em; color:#666;">地址：${r.address}</div>
                 </div>
             `).join('');
         }
     }
 
-    if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
+    // 10. 註冊 PWA Service Worker
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js');
+    }
 </script>
 </body>
 </html>
