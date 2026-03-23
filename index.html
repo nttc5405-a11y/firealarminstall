@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>成功分隊住警器系統</title>
+    <title>台東消防住警器安裝</title>
     <link rel="manifest" href="manifest.json">
     <style>
         :root { --primary: #d32f2f; --bg: #f5f5f5; }
@@ -115,7 +115,33 @@
             <option value="林世璿">林世璿</option>
         </select>
     </div>
+<div class="form-group">
+    <label>案件類別 (備註)</label>
+    <select id="note">
+        <option value="自行申請">自行申請</option>
+        <option value="訪視案件">訪視案件</option>
+    </select>
+</div>
 
+<div class="form-group">
+    <label>裝設單位</label>
+    <select id="unit">
+        <option value="成功分隊">成功分隊</option>
+        <option value="東河分隊">東河分隊</option>
+        <option value="長濱分隊">長濱分隊</option>
+    </select>
+</div>
+
+<div class="form-group">
+    <label>裝設人員</label>
+    <input type="text" id="installer" placeholder="實際安裝人員姓名">
+</div>
+
+<div class="form-group">
+    <label>認可號碼</label>
+    <input type="text" id="approval_no" placeholder="如: RD-A68121109">
+</div>
+    
     <button class="btn-submit" onclick="submitToGas()">確認上傳雲端</button>
     <div id="status-msg"></div>
 </div>
@@ -135,18 +161,22 @@
         const eligibility = Array.from(checkboxes).map(cb => cb.value).join(', ');
 
         const data = {
-            year: document.getElementById('year').value,
-            sn: document.getElementById('sn').value,
-            name: document.getElementById('name').value,
-            id: document.getElementById('id_no').value,
-            address: document.getElementById('address').value,
-            phone: document.getElementById('phone').value,
-            date: document.getElementById('install_date').value,
-            location: document.getElementById('location').value,
-            quantity: document.getElementById('qty').value,
-            eligibility: eligibility,
-            staff: document.getElementById('staff').value
-        };
+    year: document.getElementById('year').value,
+    sn: document.getElementById('sn').value,
+    name: document.getElementById('name').value,
+    id: document.getElementById('id_no').value,
+    address: document.getElementById('address').value,
+    phone: document.getElementById('phone').value,
+    date: document.getElementById('install_date').value,
+    location: document.getElementById('location').value,
+    quantity: document.getElementById('qty').value,
+    approval_no: document.getElementById('approval_no').value, // 加入認可碼
+    note: document.getElementById('note').value,               // 加入備註
+    eligibility: eligibility,
+    staff: document.getElementById('staff').value,             // 登打人
+    installer: document.getElementById('installer').value,     // 裝設人
+    unit: document.getElementById('unit').value                // 裝設單位
+};
 
         if(!data.name || !data.address) { alert("姓名與地址為必填！"); return; }
 
