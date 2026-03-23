@@ -85,17 +85,53 @@
                 <div class="form-group"><label>數量</label><input type="number" id="qty" value="1"></div>
             </div>
             <div class="form-group"><label>認可號碼</label><input type="text" id="approval_no" placeholder="RD-A68121109"></div>
-            <div class="form-group">
-                <label>補助資格 (可複選)</label>
-                <div class="checkbox-grid" id="eligibility-group">
-                    <label class="checkbox-item"><input type="checkbox" value="獨居"> 獨居</label>
-                    <label class="checkbox-item"><input type="checkbox" value="低收"> 低收</label>
-                    <label class="checkbox-item"><input type="checkbox" value="身障"> 身障</label>
-                    <label class="checkbox-item"><input type="checkbox" value="年長"> 年長</label>
-                    <label class="checkbox-item"><input type="checkbox" value="鐵皮屋"> 鐵皮屋</label>
-                    <label class="checkbox-item"><input type="checkbox" value="木造"> 木造</label>
-                </div>
-            </div>
+           <style>
+    /* 標籤按鈕化樣式 */
+    .chip-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .chip {
+        padding: 8px 12px;
+        border: 1.5px solid #ddd;
+        border-radius: 20px;
+        font-size: 0.85em;
+        cursor: pointer;
+        background: white;
+        transition: all 0.2s;
+        display: inline-block;
+        user-select: none;
+    }
+    /* 隱藏原始 Checkbox */
+    .chip input { display: none; }
+
+    /* 人員資格選中顏色 (藍色系) */
+    .chip-person input:checked + span { background: #e3f2fd; border-color: #1976d2; color: #1976d2; font-weight: bold; }
+    /* 建物型態選中顏色 (橘紅色系) */
+    .chip-building input:checked + span { background: #fff3e0; border-color: #e65100; color: #e65100; font-weight: bold; }
+</style>
+
+<div class="form-group">
+    <label>補助資格 (可多選)</label>
+    
+    <div class="section-title" style="background:#e8f5e9; border-left-color:#4caf50;">1. 人員資格 (誰住裡面)</div>
+    <div class="chip-group" id="group-person">
+        <label class="chip chip-person"><input type="checkbox" value="身心障"><span>身心障</span></label>
+        <label class="chip chip-person"><input type="checkbox" value="低收"><span>低收</span></label>
+        <label class="chip chip-person"><input type="checkbox" value="年長"><span>年長</span></label>
+        <label class="chip chip-person"><input type="checkbox" value="孕婦"><span>孕婦</span></label>
+        <label class="chip chip-person"><input type="checkbox" value="兒童"><span>兒童</span></label>
+    </div>
+
+    <div class="section-title" style="background:#fff3e0; border-left-color:#ff9800;">2. 建物型態 (環境風險)</div>
+    <div class="chip-group" id="group-building">
+        <label class="chip chip-building"><input type="checkbox" value="狹弄"><span>狹弄</span></label>
+        <label class="chip chip-building"><input type="checkbox" value="鐵皮"><span>鐵皮</span></label>
+        <label class="chip chip-building"><input type="checkbox" value="水源不足"><span>水源不足</span></label>
+        <label class="chip chip-building"><input type="checkbox" value="鐵窗"><span>鐵窗</span></label>
+        <label class="chip chip-building"><input type="checkbox" value="住宅宮廟"><span>住宅宮廟</span></label>
+        <label class="chip chip-building"><input type="checkbox" value="木造"><span>木造</span></label>
+        <label class="chip chip-building"><input type="checkbox" value="資收"><span>資收</span></label>
+        <label class="chip chip-building"><input type="checkbox" value="曾火災"><span>曾火災</span></label>
+    </div>
+</div>
 
             <div class="section-title">行政核定</div>
             <div class="form-group"><label>案件類別 (備註)</label>
