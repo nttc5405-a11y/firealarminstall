@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>成功分隊住警器系統</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        :root { --primary: #d32f2f; --bg: #f5f5f5; }
+        body { font-family: -apple-system, "Microsoft JhengHei", sans-serif; background: var(--bg); margin: 0; padding: 15px; padding-bottom: 50px; }
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        h2 { color: var(--primary); text-align: center; margin-top: 0; border-bottom: 2px solid var(--primary); padding-bottom: 10px; }
+        
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; color: #333; font-size: 0.95em; }
+        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; } /* 16px 防止 iOS 自動放大 */
+        
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        
+        /* 補助資格複選框樣式 */
+        .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: #fff9f9; padding: 10px; border-radius: 8px; border: 1px solid #ffebee; }
+        .checkbox-item { display: flex; align-items: center; font-size: 0.9em; cursor: pointer; }
+        .checkbox-item input { width: auto; margin-right: 8px; }
+
+        .btn-submit { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 10px; font-size: 1.2em; font-weight: bold; margin-top: 20px; box-shadow: 0 4px 6px rgba(211, 47, 47, 0.3); }
+        .btn-submit:active { transform: scale(0.98); background: #b71c1c; }
+        
+        #status-msg { text-align: center; margin-top: 10px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>住警器安裝登記</h2>
+    
+    <div class="grid">
+        <div class="form-group">
+            <label>年度</label>
+            <select id="year">
+                <option value="115年度">115年度</option>
+                <option value="114年度">114年度</option>
+                <option value="113年度">113年度</option>
+                <option value="112年度">112年度</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>流水編號</label>
+            <input type="number" id="sn" placeholder="如: 619">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>受補助人姓名</label>
+        <input type="text" id="name" placeholder="請輸入姓名">
+    </div>
+
+    <div class="form-group">
+        <label>身分證字號</label>
+        <input type="text" id="id_no" placeholder="V123456789">
+    </div>
+
+    <div class="form-group">
+        <label>設置地址</label>
+        <input type="text" id="address" placeholder="臺東縣成功鎮...">
+    </div>
+
+    <div class="grid">
+        <div class="form-group">
+            <label>電話</label>
+            <input type="tel" id="phone" placeholder="09xx-xxxxxx">
+        </div>
+        <div class="form-group">
+            <label>裝置日期</label>
+            <input type="date" id="install_date">
+        </div>
+    </div>
+
+    <div class="grid">
+        <div class="form-group">
+            <label>裝置位置</label>
+            <select id="location">
+                <option value="客廳">客廳</option>
+                <option value="走廊">走廊</option>
+                <option value="寢室">寢室</option>
+                <option value="廚房">廚房</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>數量</label>
+            <input type="number" id="qty" value="1">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>補助資格 (可複選)</label>
+        <div class="checkbox-grid" id="eligibility-group">
+            <label class="checkbox-item"><input type="checkbox" value="獨居"> 獨居</label>
+            <label class="checkbox-item"><input type="checkbox" value="低收"> 低收</label>
+            <label class="checkbox-item"><input type="checkbox" value="身心障礙"> 身心障礙</label>
+            <label class="checkbox-item"><input type="checkbox" value="年長(65歲↑)"> 年長(65↑)</label>
+            <label class="checkbox-item"><input type="checkbox" value="孕婦"> 孕婦</label>
+            <label class="checkbox-item"><input type="checkbox" value="鐵皮屋"> 鐵皮屋</label>
+            <label class="checkbox-item"><input type="checkbox" value="木造"> 木造</label>
+            <label class="checkbox-item"><input type="checkbox" value="狹小巷弄"> 狹小巷弄</label>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>登打人員</label>
+        <select id="staff">
+            <option value="">請選擇人員</option>
+            <option value="朱益志">朱益志</option>
+            <option value="戴敏倫">戴敏倫</option>
+            <option value="潘鑫達">潘鑫達</option>
+            <option value="林世璿">林世璿</option>
+        </select>
+    </div>
+
+    <button class="btn-submit" onclick="submitToGas()">確認上傳雲端</button>
+    <div id="status-msg"></div>
+</div>
+
+<script>
+    // 1. 設定今天日期為預設值
+    document.getElementById('install_date').valueAsDate = new Date();
+
+    // 2. 上傳功能
+    async function submitToGas() {
+        const gasUrl = "https://script.google.com/macros/s/AKfycbxmLqGt-pTJtVEkb-koh4Kbvlv14xueZbpZ3NEy8Jc5Wd-5gT0jhJ_dozUYjaCY68e4/exec"; // 務必替換成你的 GAS URL
+        const btn = document.querySelector('.btn-submit');
+        const status = document.getElementById('status-msg');
+
+        // 收集複選框
+        const checkboxes = document.querySelectorAll('#eligibility-group input:checked');
+        const eligibility = Array.from(checkboxes).map(cb => cb.value).join(', ');
+
+        const data = {
+            year: document.getElementById('year').value,
+            sn: document.getElementById('sn').value,
+            name: document.getElementById('name').value,
+            id: document.getElementById('id_no').value,
+            address: document.getElementById('address').value,
+            phone: document.getElementById('phone').value,
+            date: document.getElementById('install_date').value,
+            location: document.getElementById('location').value,
+            quantity: document.getElementById('qty').value,
+            eligibility: eligibility,
+            staff: document.getElementById('staff').value
+        };
+
+        if(!data.name || !data.address) { alert("姓名與地址為必填！"); return; }
+
+        btn.disabled = true;
+        btn.innerText = "正在上傳...";
+        status.innerText = "連線中...";
+
+        try {
+            await fetch(gasUrl, {
+                method: "POST",
+                mode: "no-cors", // 解決跨網域問題
+                body: JSON.stringify(data)
+            });
+            status.style.color = "green";
+            status.innerText = "✅ 上傳完成！已存入試算表";
+            alert("資料上傳成功！");
+            // 重設部分欄位
+            document.getElementById('name').value = "";
+            document.getElementById('id_no').value = "";
+        } catch (e) {
+            status.style.color = "red";
+            status.innerText = "❌ 上傳失敗，請檢查網路";
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "確認上傳雲端";
+        }
+    }
+
+    // 3. 註冊 PWA Service Worker
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js');
+    }
+</script>
+
+</body>
+</html>
