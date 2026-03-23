@@ -7,34 +7,47 @@
     <link rel="manifest" href="manifest.json">
     <style>
         :root { --primary: #d32f2f; --accent: #e3f2fd; --bg: #f0f2f5; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding-bottom: 70px; }
+        body { font-family: -apple-system, "Microsoft JhengHei", sans-serif; background: var(--bg); margin: 0; padding-bottom: 80px; color: #333; }
         
         /* 分頁控制 */
-        .page { display: none; padding: 15px; }
+        .page { display: none; padding: 15px; animation: fadeIn 0.3s; }
         .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
-        /* 卡片與樣式 */
         .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-top: 8px solid var(--primary); max-width: 500px; margin: auto; }
-        .section-title { background: #eee; padding: 6px 12px; border-radius: 4px; font-size: 0.85em; margin: 20px 0 10px 0; font-weight: bold; }
+        h2 { text-align: center; margin-top: 0; color: var(--primary); }
+        
+        .section-title { background: #eee; padding: 6px 12px; border-radius: 4px; font-size: 0.85em; margin: 20px 0 10px 0; font-weight: bold; border-left: 4px solid var(--primary); }
         .form-group { margin-bottom: 12px; }
         label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.9em; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        select { background-color: var(--accent); }
         
+        input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        select { background-color: var(--accent); border-color: #bbdefb; }
+        
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .input-with-btn { display: flex; gap: 8px; }
+        .btn-same { background: #607d8b; color: white; border: none; border-radius: 8px; padding: 0 10px; font-size: 0.8em; white-space: nowrap; cursor: pointer; }
+
+        /* 補助資格複選 */
+        .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #ddd; }
+        .checkbox-item { display: flex; align-items: center; font-size: 0.85em; cursor: pointer; }
+        .checkbox-item input { width: auto; margin-right: 8px; height: 18px; width: 18px; }
+
         /* 底部導覽列 */
-        .nav-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; height: 60px; z-index: 100; }
+        .nav-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; height: 65px; z-index: 1000; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.8em; color: #666; cursor: pointer; }
         .nav-item.active { color: var(--primary); font-weight: bold; }
+        .nav-icon { font-size: 20px; margin-bottom: 3px; }
 
-        /* 成功畫面 */
-        #success-page { text-align: center; }
-        .receipt { text-align: left; background: #f9f9f9; padding: 15px; border-radius: 8px; margin: 15px 0; font-size: 0.9em; }
-
+        /* 成功憑證 */
+        .receipt { text-align: left; background: #f1f8e9; padding: 15px; border-radius: 8px; margin: 15px 0; font-size: 0.9em; border: 1px dashed #4caf50; line-height: 1.6; }
+        
         /* 查重清單 */
         #search-results { margin-top: 15px; }
-        .result-item { background: white; padding: 10px; margin-bottom: 8px; border-radius: 8px; border-left: 5px solid #1976d2; font-size: 0.85em; }
+        .result-item { background: white; padding: 12px; margin-bottom: 10px; border-radius: 10px; border-left: 5px solid #1976d2; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .no-data { text-align: center; color: #999; margin-top: 30px; font-size: 0.9em; }
 
-        .btn-submit { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 10px; font-size: 1.1em; font-weight: bold; margin-top: 10px; }
+        .btn-submit { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 10px; font-size: 1.1em; font-weight: bold; margin-top: 15px; cursor: pointer; box-shadow: 0 4px 10px rgba(211,47,47,0.3); }
     </style>
 </head>
 <body>
@@ -42,14 +55,62 @@
     <div id="register-page" class="page active">
         <div class="card">
             <h2>🏠 住警器登記</h2>
-            <div class="section-title">基本資料</div>
-            <div class="form-group"><label>受補助人姓名</label><input type="text" id="name"></div>
-            <div class="form-group"><label>身分證字號</label><input type="text" id="id_no" placeholder="V123456789"></div>
-            <div class="form-group"><label>電話</label><input type="tel" id="phone" placeholder="09xx-xxxxxx"></div>
+            
+            <div class="section-title">對象與地址</div>
+            <div class="grid">
+                <div class="form-group"><label>年度</label>
+                    <select id="year">
+                        <option value="115年度">115年度</option>
+                        <option value="114年度">114年度</option>
+                        <option value="113年度">113年度</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>裝置日期</label><input type="date" id="install_date"></div>
+            </div>
+            <div class="form-group"><label>受補助人姓名</label><input type="text" id="name" placeholder="請輸入姓名"></div>
+            <div class="form-group"><label>身分證字號</label><input type="text" id="id_no" placeholder="例: V123456789"></div>
+            <div class="form-group"><label>電話</label><input type="tel" id="phone" placeholder="手機或市話"></div>
             <div class="form-group"><label>設置地址</label><input type="text" id="address" value="臺東縣成功鎮"></div>
 
+            <div class="section-title">設備資訊</div>
+            <div class="grid">
+                <div class="form-group"><label>裝置位置</label>
+                    <select id="location">
+                        <option value="客廳">客廳</option>
+                        <option value="走廊">走廊</option>
+                        <option value="寢室">寢室</option>
+                        <option value="廚房">廚房</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>數量</label><input type="number" id="qty" value="1"></div>
+            </div>
+            <div class="form-group"><label>認可號碼</label><input type="text" id="approval_no" placeholder="RD-A68121109"></div>
+            <div class="form-group">
+                <label>補助資格 (可複選)</label>
+                <div class="checkbox-grid" id="eligibility-group">
+                    <label class="checkbox-item"><input type="checkbox" value="獨居"> 獨居</label>
+                    <label class="checkbox-item"><input type="checkbox" value="低收"> 低收</label>
+                    <label class="checkbox-item"><input type="checkbox" value="身障"> 身障</label>
+                    <label class="checkbox-item"><input type="checkbox" value="年長"> 年長</label>
+                    <label class="checkbox-item"><input type="checkbox" value="鐵皮屋"> 鐵皮屋</label>
+                    <label class="checkbox-item"><input type="checkbox" value="木造"> 木造</label>
+                </div>
+            </div>
+
             <div class="section-title">行政核定</div>
-            <div class="form-group"><label>登打人員</label><input type="text" id="staff"></div>
+            <div class="form-group"><label>案件類別 (備註)</label>
+                <select id="note">
+                    <option value="自行申請">自行申請</option>
+                    <option value="訪視案件">訪視案件</option>
+                </select>
+            </div>
+            <div class="form-group"><label>登打人員</label><input type="text" id="staff" placeholder="輸入姓名"></div>
+            <div class="form-group"><label>裝設人員</label>
+                <div class="input-with-btn">
+                    <input type="text" id="installer" placeholder="安裝人姓名">
+                    <button type="button" class="btn-same" onclick="copyStaff()">同登打人</button>
+                </div>
+            </div>
             <div class="form-group"><label>裝設單位</label>
                 <select id="unit">
                     <option value="成功分隊">成功分隊</option>
@@ -57,38 +118,49 @@
                     <option value="長濱分隊">長濱分隊</option>
                 </select>
             </div>
-            <button class="btn-submit" onclick="submitToGas()">確認上傳</button>
+            <button class="btn-submit" id="submitBtn" onclick="submitToGas()">確認上傳雲端</button>
         </div>
     </div>
 
     <div id="check-page" class="page">
         <div class="card">
             <h2>🔍 雲端查重</h2>
-            <p style="font-size: 0.8em; color: #666;">輸入姓名或地址關鍵字查詢是否已裝設</p>
-            <input type="text" id="search-input" placeholder="輸入關鍵字..." oninput="searchData()">
-            <div id="search-results">正在同步雲端資料...</div>
+            <div class="form-group">
+                <input type="text" id="search-input" placeholder="輸入姓名、身分證或地址關鍵字..." oninput="searchData()">
+            </div>
+            <div id="sync-status" style="font-size: 0.8em; color: #1976d2; text-align: center;">正在同步雲端資料...</div>
+            <div id="search-results">
+                <div class="no-data">請輸入關鍵字開始查詢</div>
+            </div>
         </div>
     </div>
 
     <div id="success-page" class="page">
-        <div class="card">
-            <h2 style="color: #2e7d32;">✅ 上傳成功</h2>
+        <div class="card" style="text-align: center;">
+            <div style="font-size: 50px;">✅</div>
+            <h2 style="color: #2e7d32; margin-bottom: 5px;">上傳成功</h2>
+            <p style="color: #666; font-size: 0.9em; margin-top: 0;">資料已即時寫入雲端試算表</p>
             <div class="receipt" id="receipt-content"></div>
-            <button class="btn-submit" style="background: #666;" onclick="switchPage('register-page')">回首頁</button>
+            <button class="btn-submit" style="background: #666;" onclick="switchPage('register-page')">回首頁繼續登記</button>
         </div>
     </div>
 
     <div class="nav-bar">
-        <div class="nav-item active" id="nav-reg" onclick="switchPage('register-page')">📝 登記</div>
-        <div class="nav-item" id="nav-check" onclick="switchPage('check-page'); loadAllData();">🔍 查重</div>
+        <div class="nav-item active" id="nav-reg" onclick="switchPage('register-page')">
+            <span class="nav-icon">📝</span><span>登記</span>
+        </div>
+        <div class="nav-item" id="nav-check" onclick="switchPage('check-page'); loadAllData();">
+            <span class="nav-icon">🔍</span><span>查重</span>
+        </div>
     </div>
 
 <script>
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbwBzyxIS9uDKk8BTC5IfEhrcnmFH0KaCntBEXDvaFoMMzn0SyKU4ZKg3lCkXC3nBWm0/exec";
-    let cachedData = []; // 用於存放從雲端抓回來的資料
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbz1Rz1syl9z8M-2lvdeyq2CddsBVbdt4IjT8fouKFTyhThsr7o0thnNsPIca0JD_d8R/exec";
+    let cachedData = [];
 
-    // 1. 初始化：讀取記憶的人員資訊
+    // 1. 初始化
     window.onload = () => {
+        document.getElementById('install_date').valueAsDate = new Date();
         if(localStorage.getItem('fire_staff')) document.getElementById('staff').value = localStorage.getItem('fire_staff');
         if(localStorage.getItem('fire_unit')) document.getElementById('unit').value = localStorage.getItem('fire_unit');
     };
@@ -100,68 +172,112 @@
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         if(pageId === 'register-page') document.getElementById('nav-reg').classList.add('active');
         if(pageId === 'check-page') document.getElementById('nav-check').classList.add('active');
+        window.scrollTo(0, 0);
     }
 
-    // 3. 格式檢查 (Regex)
+    // 3. 同上按鈕
+    function copyStaff() {
+        const staff = document.getElementById('staff').value;
+        if(staff) document.getElementById('installer').value = staff;
+        else alert("請先輸入登打人姓名");
+    }
+
+    // 4. 格式檢查
     function validateData(d) {
         const idRegex = /^[A-Z][12]\d{8}$/;
-        const phoneRegex = /^0\d{1,2}-?\d{6,8}$|^09\d{2}-?\d{3}-?\d{3}$/;
-        if(!idRegex.test(d.id)) { alert("身分證格式錯誤！"); return false; }
-        if(!phoneRegex.test(d.phone)) { alert("電話格式錯誤！"); return false; }
+        if(!d.name || !d.address || !d.staff) { alert("姓名、地址與登打人不可為空！"); return false; }
+        if(d.id && !idRegex.test(d.id)) { alert("身分證格式錯誤！(首字大寫)"); return false; }
         return true;
     }
 
-    // 4. 上傳並顯示結果
+    // 5. 上傳功能
     async function submitToGas() {
+        const btn = document.getElementById('submitBtn');
+        const checkboxes = document.querySelectorAll('#eligibility-group input:checked');
+        const eligibility = Array.from(checkboxes).map(cb => cb.value).join(', ');
+
         const payload = {
-            name: document.getElementById('name').value,
-            id: document.getElementById('id_no').value.toUpperCase(),
-            phone: document.getElementById('phone').value,
-            address: document.getElementById('address').value,
-            staff: document.getElementById('staff').value,
-            unit: document.getElementById('unit').value,
-            year: "115年度", // 範例
-            date: new Date().toISOString().split('T')[0]
+            year: document.getElementById('year').value,
+            date: document.getElementById('install_date').value,
+            name: document.getElementById('name').value.trim(),
+            id: document.getElementById('id_no').value.trim().toUpperCase(),
+            phone: document.getElementById('phone').value.trim(),
+            address: document.getElementById('address').value.trim(),
+            location: document.getElementById('location').value,
+            quantity: document.getElementById('qty').value,
+            approval_no: document.getElementById('approval_no').value.trim(),
+            note: document.getElementById('note').value,
+            eligibility: eligibility,
+            staff: document.getElementById('staff').value.trim(),
+            installer: document.getElementById('installer').value.trim(),
+            unit: document.getElementById('unit').value
         };
 
         if(!validateData(payload)) return;
 
-        // 記憶人員資訊
+        // 記憶人員
         localStorage.setItem('fire_staff', payload.staff);
         localStorage.setItem('fire_unit', payload.unit);
 
-        // 顯示資訊並上傳
-        document.getElementById('receipt-content').innerHTML = `
-            <b>受補助人：</b>${payload.name}<br>
-            <b>地址：</b>${payload.address}<br>
-            <b>時間：</b>${payload.date}<br>
-            <b>登打人：</b>${payload.staff}
-        `;
-        
+        btn.disabled = true;
+        btn.innerText = "上傳中...";
+
         try {
             await fetch(GAS_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
+            
+            // 顯示憑證
+            document.getElementById('receipt-content').innerHTML = `
+                <b>年度：</b>${payload.year}<br>
+                <b>受補助人：</b>${payload.name}<br>
+                <b>設置地址：</b>${payload.address}<br>
+                <b>裝設位置：</b>${payload.location} (${payload.quantity}顆)<br>
+                <b>登打人員：</b>${payload.staff}
+            `;
             switchPage('success-page');
-            document.getElementById('name').value = ""; // 清空
-        } catch(e) { alert("上傳失敗"); }
+            document.getElementById('name').value = "";
+            document.getElementById('id_no').value = "";
+        } catch(e) { alert("連線錯誤，請重試"); }
+        finally { btn.disabled = false; btn.innerText = "確認上傳雲端"; }
     }
 
-    // 5. 查重功能：從雲端抓取
+    // 6. 查重邏輯 (修正：空白時不顯示)
     async function loadAllData() {
-        const res = await fetch(GAS_URL); // GAS 需要有 doGet 功能
-        cachedData = await res.json();
-        document.getElementById('search-results').innerText = `已同步 ${cachedData.length} 筆資料`;
+        try {
+            const res = await fetch(GAS_URL);
+            cachedData = await res.json();
+            document.getElementById('sync-status').innerText = `✅ 雲端同步完成 (共 ${cachedData.length} 筆)`;
+        } catch(e) { document.getElementById('sync-status').innerText = "❌ 無法連接雲端"; }
     }
 
     function searchData() {
-        const key = document.getElementById('search-input').value;
-        const results = cachedData.filter(d => d.name.includes(key) || d.address.includes(key));
-        let html = results.map(r => `
-            <div class="result-item">
-                <b>${r.name}</b> (${r.year})<br>${r.address}<br><small>裝設日：${r.date}</small>
-            </div>
-        `).join('');
-        document.getElementById('search-results').innerHTML = html || "查無重複資料";
+        const key = document.getElementById('search-input').value.trim().toUpperCase();
+        const resultsDiv = document.getElementById('search-results');
+        
+        if(!key) {
+            resultsDiv.innerHTML = '<div class="no-data">請輸入關鍵字開始查詢</div>';
+            return;
+        }
+
+        const filtered = cachedData.filter(d => 
+            (d.name && d.name.includes(key)) || 
+            (d.address && d.address.includes(key)) || 
+            (d.id && d.id.includes(key))
+        );
+
+        if(filtered.length === 0) {
+            resultsDiv.innerHTML = '<div class="no-data">查無重複資料</div>';
+        } else {
+            resultsDiv.innerHTML = filtered.map(r => `
+                <div class="result-item">
+                    <div style="font-weight:bold; color:var(--primary);">${r.name}</div>
+                    <div style="font-size:0.9em;">年度：${r.year} | 裝設日：${r.date || '未註記'}</div>
+                    <div style="font-size:0.9em; color:#666;">地址：${r.address}</div>
+                </div>
+            `).join('');
+        }
     }
+
+    if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
 </script>
 </body>
 </html>
